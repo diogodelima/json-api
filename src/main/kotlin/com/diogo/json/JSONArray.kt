@@ -1,13 +1,17 @@
 package com.diogo.json
 
-class JSONObject(
+class JSONArray(
 
-    private val map: MutableMap<String, Any> = LinkedHashMap()
+    private val list: MutableList<Any> = ArrayList()
 
 ) {
 
-    fun put(key: String, value: Any){
-        this.map[key] = value
+    fun add(value: Any){
+        this.list.add(value)
+    }
+
+    fun add(vararg values: Any){
+        this.list.addAll(values)
     }
 
     override fun toString(): String {
@@ -16,20 +20,14 @@ class JSONObject(
 
     fun toString(indent: Int): String {
 
-        var i = 0
         val builder = StringBuilder()
-        builder.append("{\n")
 
-        this.map.forEach { entry ->
+        builder.append("[\n")
 
-            val key = entry.key
-            val value = entry.value
+        for ((i, value) in list.withIndex()){
 
             for (j in 0 until indent)
                 builder.append(" ")
-
-            builder
-                .append("\"${key}\": ")
 
             when (value) {
                 is JSONObject -> builder.append(value.toString(indent + 2))
@@ -38,7 +36,7 @@ class JSONObject(
                 else -> builder.append(value)
             }
 
-            if (i++ < this.map.size - 1)
+            if (i < this.list.size - 1)
                 builder.append(",")
 
             builder.append("\n")
@@ -47,7 +45,7 @@ class JSONObject(
         for (j in 0 until indent - 2)
             builder.append(" ")
 
-        builder.append("}")
+        builder.append("]")
         return builder.toString()
     }
 
