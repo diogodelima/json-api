@@ -18,6 +18,7 @@ class JSONObject(
 
         var i = 0
         val builder = StringBuilder()
+
         builder.append("{\n")
 
         this.map.forEach { entry ->
