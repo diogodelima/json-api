@@ -75,7 +75,7 @@ class JSONParser(
                 continue
             }
 
-            val value = line.replace("\"", "").replace(",", "").split(":")[1].trim()
+            val value = line.replace("\"", "").replace(",", "").trim()
 
             try {
                 if (value.contains(".")) {
