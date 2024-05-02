@@ -109,17 +109,38 @@ class JSONObjectTest {
         person.put("surname", "Lima")
         person.put("age", 20)
 
+        var birthday = JSONObject()
+        birthday.put("year", 2004)
+        birthday.put("month", 3)
+        birthday.put("day", 1)
+
+        person.put("birthday", birthday)
+
         val person1 = JSONObject()
 
         person1.put("name", "Pedro")
         person1.put("surname", "Silva")
         person1.put("age", 27)
 
+        birthday = JSONObject()
+        birthday.put("year", 1997)
+        birthday.put("month", 4)
+        birthday.put("day", 3)
+
+        person1.put("birthday", birthday)
+
         val person2 = JSONObject()
 
         person2.put("name", "Ricardo")
         person2.put("surname", "Carvalho")
         person2.put("age", 34)
+
+        birthday = JSONObject()
+        birthday.put("year", 1990)
+        birthday.put("month", 2)
+        birthday.put("day", 23)
+
+        person2.put("birthday", birthday)
 
         val persons = JSONArray()
         persons.add(person, person1, person2)
@@ -135,21 +156,38 @@ class JSONObjectTest {
                 {
                   "name": "Diogo",
                   "surname": "Lima",
-                  "age": 20
+                  "age": 20,
+                  "birthday": {
+                    "year": 2004,
+                    "month": 3,
+                    "day": 1
+                  }
                 },
                 {
                   "name": "Pedro",
                   "surname": "Silva",
-                  "age": 27
+                  "age": 27,
+                  "birthday": {
+                    "year": 1997,
+                    "month": 4,
+                    "day": 3
+                  }
                 },
                 {
                   "name": "Ricardo",
                   "surname": "Carvalho",
-                  "age": 34
+                  "age": 34,
+                  "birthday": {
+                    "year": 1990,
+                    "month": 2,
+                    "day": 23
+                  }
                 }
               ]
             }
         """.trimIndent()
+
+        println(actual.toString())
 
         assertEquals(expected, actual.toString())
     }
