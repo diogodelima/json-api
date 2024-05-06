@@ -2,12 +2,16 @@ package com.diogo.json
 
 class JSONObject(
 
-    private val map: MutableMap<String, Any> = LinkedHashMap()
+    private val map: MutableMap<String, Any?> = LinkedHashMap()
 
 ) {
 
-    fun put(key: String, value: Any){
+    fun put(key: String, value: Any?){
         this.map[key] = value
+    }
+
+    fun get(key: String) : Any? {
+        return this.map[key]
     }
 
     override fun toString(): String {

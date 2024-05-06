@@ -2,6 +2,10 @@ package com.diogo.json
 
 import java.io.BufferedReader
 import java.io.StringReader
+import kotlin.reflect.KProperty1
+import kotlin.reflect.KType
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.jvm.isAccessible
 
 class JSONParser(
 
@@ -11,9 +15,63 @@ class JSONParser(
 
     constructor(text: String) : this(BufferedReader(StringReader(text)))
 
-    fun parse() : JSONObject {
+    private lateinit var jsonObject : JSONObject
+
+    companion object {
+
+        fun save(o: Any) : JSONObject {
+
+            val jsonObject = JSONObject()
+            val clazz = o::class
+
+            clazz.memberProperties.forEach { member ->
+                member.isAccessible = true
+                saveField(o, member, jsonObject)
+            }
+
+            return jsonObject
+        }
+
+        private fun saveField(o: Any, member: KProperty1<out Any, *>, jsonObject: JSONObject){
+
+            val key = member.name
+            val value = member.getter.call(o) ?: return
+
+            if (isPrimitive(member.returnType))
+                jsonObject.put(key, value)
+            else
+                jsonObject.put(key, save(value))
+
+        }
+
+        private fun isPrimitive(type: KType) : Boolean {
+
+            return type.classifier?.let {
+                when (it) {
+                    Int::class, Long::class, Double::class, Float::class, Short::class,
+                    Byte::class, Char::class, Boolean::class, String::class -> true
+                    else -> false
+                }
+            }!!
+
+        }
+
+    }
+
+    fun parse() : JSONObject{
+
+        if (::jsonObject.isInitialized)
+            return this.jsonObject
+
+        return parse(true)
+    }
+
+    private fun parse(first: Boolean) : JSONObject {
 
         val jsonObject = JSONObject()
+
+        if (first)
+            this.jsonObject = jsonObject
 
         for (line in reader.lines()){
 
@@ -24,7 +82,7 @@ class JSONParser(
 
                 if (line.contains(":")){
                     val key = line.split(":")[0].replace("\"", "").trim()
-                    jsonObject.put(key, parse())
+                    jsonObject.put(key, parse(false))
                 }
 
                 continue
@@ -53,7 +111,8 @@ class JSONParser(
             jsonObject.put(key, value)
         }
 
-        return jsonObject
+        reader.close()
+        throw RuntimeException("Invalid JSON")
     }
 
     private fun parseToJSONArray() : JSONArray {
@@ -66,7 +125,7 @@ class JSONParser(
                 return jsonArray
 
             if (line.contains("{")){
-                jsonArray.add(parse())
+                jsonArray.add(parse(false))
                 continue
             }
 
@@ -90,7 +149,8 @@ class JSONParser(
 
         }
 
-        return jsonArray
+        reader.close()
+        throw RuntimeException("Invalid JSON")
     }
 
 }
