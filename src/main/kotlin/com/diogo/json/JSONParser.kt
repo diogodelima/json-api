@@ -4,8 +4,11 @@ import java.io.BufferedReader
 import java.io.StringReader
 import kotlin.reflect.KProperty1
 import kotlin.reflect.KType
+import kotlin.reflect.full.createType
+import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
+import kotlin.reflect.typeOf
 
 class JSONParser(
 
@@ -39,9 +42,42 @@ class JSONParser(
 
             if (isPrimitive(member.returnType))
                 jsonObject.put(key, value)
+            else if (isArray(member.returnType))
+                jsonObject.put(key, saveArray(value))
             else
                 jsonObject.put(key, save(value))
 
+        }
+
+        private fun saveArray(o: Any) : JSONObject {
+
+            val jsonObject = JSONObject()
+            val jsonArray = JSONArray()
+            val array = o as Array<*>
+
+            jsonObject.put("length", array.size)
+            jsonObject.put("elements", jsonArray)
+
+            for (element in array){
+
+                if (element == null)
+                    continue
+
+                if (element is Array<*>) {
+                    jsonArray.add(saveArray(element))
+                    continue
+                }
+
+                val type = element::class.createType()
+
+                if (isPrimitive(type))
+                    jsonArray.add(element)
+                else
+                    jsonArray.add(save(element))
+
+            }
+
+            return jsonObject
         }
 
         private fun isPrimitive(type: KType) : Boolean {
@@ -49,11 +85,15 @@ class JSONParser(
             return type.classifier?.let {
                 when (it) {
                     Int::class, Long::class, Double::class, Float::class, Short::class,
-                    Byte::class, Char::class, Boolean::class, String::class -> true
+                    Byte::class, Char::class, Boolean::class, String::class, -> true
                     else -> false
                 }
             }!!
 
+        }
+
+        private fun isArray(type: KType): Boolean {
+            return type.isSubtypeOf(typeOf<Array<*>>())
         }
 
     }

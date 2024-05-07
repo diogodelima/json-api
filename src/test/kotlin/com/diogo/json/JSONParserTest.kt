@@ -19,9 +19,34 @@ class JSONParserTest {
 
         private val name: String,
         private val age: Int,
-        private val birthday: Date
+        private val birthday: Date,
+        private val grades: Array<Int>,
+        private val exams: Array<Date>,
+        private val array: Array<Array<Int>>
 
-    )
+    ) {
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as Person
+
+            if (name != other.name) return false
+            if (age != other.age) return false
+            if (birthday != other.birthday) return false
+            if (!grades.contentEquals(other.grades)) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = name.hashCode()
+            result = 31 * result + age
+            result = 31 * result + birthday.hashCode()
+            result = 31 * result + grades.contentHashCode()
+            return result
+        }
+    }
 
     @Test
     fun saveSimpleObjectTest() {
@@ -29,19 +54,79 @@ class JSONParserTest {
         val expected = """
             {
               "age": 20,
+              "array": {
+                "length": 3,
+                "elements": [
+                  {
+                    "length": 3,
+                    "elements": [
+                      3,
+                      5,
+                      8
+                    ]
+                  },
+                  {
+                    "length": 3,
+                    "elements": [
+                      10,
+                      12,
+                      14
+                    ]
+                  },
+                  {
+                    "length": 3,
+                    "elements": [
+                      16,
+                      18,
+                      20
+                    ]
+                  }
+                ]
+              },
               "birthday": {
                 "day": 1,
                 "month": 3,
                 "year": 2004
               },
+              "exams": {
+                "length": 3,
+                "elements": [
+                  {
+                    "day": 27,
+                    "month": 5,
+                    "year": 2024
+                  },
+                  {
+                    "day": 5,
+                    "month": 6,
+                    "year": 2024
+                  },
+                  {
+                    "day": 6,
+                    "month": 6,
+                    "year": 2024
+                  }
+                ]
+              },
+              "grades": {
+                "length": 5,
+                "elements": [
+                  16,
+                  17,
+                  19,
+                  20,
+                  16
+                ]
+              },
               "name": "Diogo"
             }
         """.trimIndent()
 
-        val person = Person("Diogo", 20, Date(2004, 3, 1))
+        val person = Person("Diogo", 20, Date(2004, 3, 1), arrayOf(16, 17, 19, 20, 16),
+            arrayOf(Date(2024, 5, 27), Date(2024, 6, 5), Date(2024, 6, 6)),
+            arrayOf(arrayOf(3, 5, 8), arrayOf(10, 12, 14), arrayOf(16, 18, 20))
+        )
         val jsonObject = JSONParser.save(person)
-
-        println(jsonObject.toString())
 
         assertEquals(expected, jsonObject.toString())
     }
