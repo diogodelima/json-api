@@ -20,7 +20,7 @@ class JSONParserTest {
         private val name: String,
         private val age: Int,
         private val birthday: Date,
-        private val grades: Array<Int>,
+        private val grades: List<Int>,
         private val exams: Array<Date>,
         private val array: Array<Array<Int>>
 
@@ -34,7 +34,6 @@ class JSONParserTest {
             if (name != other.name) return false
             if (age != other.age) return false
             if (birthday != other.birthday) return false
-            if (!grades.contentEquals(other.grades)) return false
 
             return true
         }
@@ -43,7 +42,6 @@ class JSONParserTest {
             var result = name.hashCode()
             result = 31 * result + age
             result = 31 * result + birthday.hashCode()
-            result = 31 * result + grades.contentHashCode()
             return result
         }
     }
@@ -122,7 +120,7 @@ class JSONParserTest {
             }
         """.trimIndent()
 
-        val person = Person("Diogo", 20, Date(2004, 3, 1), arrayOf(16, 17, 19, 20, 16),
+        val person = Person("Diogo", 20, Date(2004, 3, 1), listOf(16, 17, 19, 20, 16),
             arrayOf(Date(2024, 5, 27), Date(2024, 6, 5), Date(2024, 6, 6)),
             arrayOf(arrayOf(3, 5, 8), arrayOf(10, 12, 14), arrayOf(16, 18, 20))
         )

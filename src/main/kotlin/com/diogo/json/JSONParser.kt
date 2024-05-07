@@ -44,9 +44,19 @@ class JSONParser(
                 jsonObject.put(key, value)
             else if (isArray(member.returnType))
                 jsonObject.put(key, saveArray(value))
+            else if (isCollection(member.returnType))
+                jsonObject.put(key, saveCollection(value))
             else
                 jsonObject.put(key, save(value))
 
+        }
+
+        private fun saveCollection(o: Any) : JSONObject {
+
+            val collection = o as Collection<*>
+            val array = collection.toTypedArray()
+
+            return saveArray(array)
         }
 
         private fun saveArray(o: Any) : JSONObject {
@@ -90,6 +100,10 @@ class JSONParser(
                 }
             }!!
 
+        }
+
+        private fun isCollection(type: KType): Boolean {
+            return type.isSubtypeOf(typeOf<Collection<*>>())
         }
 
         private fun isArray(type: KType): Boolean {
