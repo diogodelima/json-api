@@ -2,13 +2,12 @@ package com.diogo.json
 
 import java.io.BufferedReader
 import java.io.StringReader
-import kotlin.reflect.KProperty1
-import kotlin.reflect.KType
+import kotlin.reflect.*
+import kotlin.reflect.full.createInstance
 import kotlin.reflect.full.createType
 import kotlin.reflect.full.isSubtypeOf
 import kotlin.reflect.full.memberProperties
 import kotlin.reflect.jvm.isAccessible
-import kotlin.reflect.typeOf
 
 class JSONParser(
 
@@ -76,6 +75,9 @@ class JSONParser(
                 if (element is Array<*>) {
                     jsonArray.add(saveArray(element))
                     continue
+                }else if (element is Collection<*>) {
+                    jsonArray.add(saveCollection(element))
+                    continue
                 }
 
                 val type = element::class.createType()
@@ -108,6 +110,35 @@ class JSONParser(
 
         private fun isArray(type: KType): Boolean {
             return type.isSubtypeOf(typeOf<Array<*>>())
+        }
+
+    }
+
+    fun <T : Any> load(clazz: KClass<T>, jsonObject: JSONObject = parse()) : T {
+
+        val t = clazz.createInstance()
+
+        clazz.memberProperties.forEach { member ->
+
+            if (member is KMutableProperty<*>)
+                loadField(t, member, jsonObject)
+
+        }
+
+        return t
+    }
+
+    fun <T> loadField(t: T, member: KMutableProperty<*>, jsonObject: JSONObject){
+
+        val value = jsonObject.get(member.name)
+        val type = member.returnType
+
+        if (isPrimitive(type))
+            member.setter.call(t, value)
+        else {
+            val clazz = (type.classifier as? KClass<*>)!!
+            val v = load(clazz, value as JSONObject)
+            member.setter.call(t, v)
         }
 
     }

@@ -1,19 +1,33 @@
 package com.diogo.json
 
 import org.junit.jupiter.api.Assertions.*
-import java.time.LocalDate
-import kotlin.properties.Delegates
 import kotlin.test.Test
 
 class JSONParserTest {
 
+    data class Person1(
+
+        var name: String?,
+        var age: Long?,
+        var birthday: Date?
+
+    ){
+
+        constructor() : this(null, null, null)
+
+    }
+
     data class Date(
 
-        private val year: Int,
-        private val month: Int,
-        private val day: Int
+        var year: Long?,
+        var month: Long?,
+        var day: Long?
 
-    )
+    ){
+
+        constructor() : this(null, null, null)
+
+    }
 
     data class Person(
 
@@ -47,7 +61,7 @@ class JSONParserTest {
     }
 
     @Test
-    fun saveSimpleObjectTest() {
+    fun saveObjectTest() {
 
         val expected = """
             {
@@ -127,6 +141,27 @@ class JSONParserTest {
         val jsonObject = JSONParser.save(person)
 
         assertEquals(expected, jsonObject.toString())
+    }
+
+    @Test
+    fun loadObjectTest(){
+
+        val json = """
+            {
+              "name": "Diogo",
+              "age": 20,
+              "birthday": {
+                "day": 1,
+                "month": 3,
+                "year": 2004
+              }
+            }
+        """.trimIndent()
+
+        val person = JSONParser(json).load(Person1::class)
+        val expected = "Person1(name=Diogo, age=20, birthday=Date(year=2004, month=3, day=1))"
+
+        assertEquals(expected, person.toString())
     }
 
     @Test
