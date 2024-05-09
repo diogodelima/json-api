@@ -10,11 +10,12 @@ class JSONParserTest {
         var name: String?,
         var age: Long?,
         var birthday: Date?,
-        var grades: Array<Any>?
+        var grades: Array<Long>?,
+        var exams: Array<Date>?,
 
     ){
 
-        constructor() : this(null, null, null, null)
+        constructor() : this(null, null, null, null, null)
 
         override fun equals(other: Any?): Boolean {
             if (this === other) return true
@@ -190,13 +191,34 @@ class JSONParserTest {
                   20,
                   16
                 ]
+              },
+              "exams": {
+                "length": 3,
+                "elements": [
+                  {
+                    "day": 27,
+                    "month": 5,
+                    "year": 2024
+                  },
+                  {
+                    "day": 5,
+                    "month": 6,
+                    "year": 2024
+                  },
+                  {
+                    "day": 6,
+                    "month": 6,
+                    "year": 2024
+                  }
+                ]
               }
             }
         """.trimIndent()
 
         val person = JSONParser(json).load(Person1::class)
-        val expected = "Person1(name=Diogo, age=20, birthday=Date(year=2004, month=3, day=1), grades=[16, 17, 19, 20, 16])"
+        val expected = "Person1(name=Diogo, age=20, birthday=Date(year=2004, month=3, day=1), grades=[16, 17, 19, 20, 16], exams=[Date(year=2024, month=5, day=27), Date(year=2024, month=6, day=5), Date(year=2024, month=6, day=6)])"
 
+        println(person.toString())
         assertEquals(expected, person.toString())
     }
 

@@ -139,8 +139,8 @@ class JSONParser(
             value = value as JSONObject
             val length = (value.get("length") as Long).toInt()
             val arrayType = type.arguments.first().type!!.classifier as KClass<*>
-            val array = java.lang.reflect.Array.newInstance(arrayType.java, length)
-            loadArray(array, value.get("elements") as JSONArray)
+            val array = java.lang.reflect.Array.newInstance(arrayType.javaObjectType, length)
+            loadArray(array, arrayType, value.get("elements") as JSONArray)
             member.setter.call(t, array)
         }
         else {
@@ -151,10 +151,16 @@ class JSONParser(
 
     }
 
-    fun <T> loadArray(array: T, jsonArray: JSONArray) {
+    fun <T> loadArray(array: T, arrayType: KClass<*>, jsonArray: JSONArray) {
 
         for ((i, element) in jsonArray.getAll().withIndex()){
-            java.lang.reflect.Array.set(array, i, element)
+
+            val type = element::class.createType()
+
+            if (isPrimitive(type))
+                java.lang.reflect.Array.set(array, i, element)
+            else
+                java.lang.reflect.Array.set(array, i, load(arrayType, element as JSONObject))
         }
 
     }
