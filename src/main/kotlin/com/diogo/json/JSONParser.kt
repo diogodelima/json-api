@@ -109,7 +109,7 @@ class JSONParser(
         }
 
         private fun isArray(type: KType): Boolean {
-            return type.isSubtypeOf(typeOf<Array<*>>())
+            return type.isSubtypeOf(typeOf<Array<*>?>())
         }
 
     }
@@ -130,15 +130,31 @@ class JSONParser(
 
     fun <T> loadField(t: T, member: KMutableProperty<*>, jsonObject: JSONObject){
 
-        val value = jsonObject.get(member.name)
+        var value = jsonObject.get(member.name)
         val type = member.returnType
 
         if (isPrimitive(type))
             member.setter.call(t, value)
+        else if (isArray(type)){
+            value = value as JSONObject
+            val length = (value.get("length") as Long).toInt()
+            val arrayType = type.arguments.first().type!!.classifier as KClass<*>
+            val array = java.lang.reflect.Array.newInstance(arrayType.java, length)
+            loadArray(array, value.get("elements") as JSONArray)
+            member.setter.call(t, array)
+        }
         else {
             val clazz = (type.classifier as? KClass<*>)!!
             val v = load(clazz, value as JSONObject)
             member.setter.call(t, v)
+        }
+
+    }
+
+    fun <T> loadArray(array: T, jsonArray: JSONArray) {
+
+        for ((i, element) in jsonArray.getAll().withIndex()){
+            java.lang.reflect.Array.set(array, i, element)
         }
 
     }

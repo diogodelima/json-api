@@ -14,6 +14,10 @@ class JSONArray(
         this.list.addAll(values)
     }
 
+    fun getAll() : Collection<Any> {
+        return this.list
+    }
+
     override fun toString(): String {
         return toString(2)
     }

@@ -9,11 +9,37 @@ class JSONParserTest {
 
         var name: String?,
         var age: Long?,
-        var birthday: Date?
+        var birthday: Date?,
+        var grades: Array<Any>?
 
     ){
 
-        constructor() : this(null, null, null)
+        constructor() : this(null, null, null, null)
+
+        override fun equals(other: Any?): Boolean {
+            if (this === other) return true
+            if (javaClass != other?.javaClass) return false
+
+            other as Person1
+
+            if (name != other.name) return false
+            if (age != other.age) return false
+            if (birthday != other.birthday) return false
+            if (grades != null) {
+                if (other.grades == null) return false
+                if (!grades.contentEquals(other.grades)) return false
+            } else if (other.grades != null) return false
+
+            return true
+        }
+
+        override fun hashCode(): Int {
+            var result = name?.hashCode() ?: 0
+            result = 31 * result + (age?.hashCode() ?: 0)
+            result = 31 * result + (birthday?.hashCode() ?: 0)
+            result = 31 * result + (grades?.contentHashCode() ?: 0)
+            return result
+        }
 
     }
 
@@ -34,7 +60,7 @@ class JSONParserTest {
         private val name: String,
         private val age: Int,
         private val birthday: Date,
-        private val grades: List<Int>,
+        private val grades: List<Any>,
         private val exams: Array<Date>,
         private val array: Array<Array<Int>>
 
@@ -154,12 +180,22 @@ class JSONParserTest {
                 "day": 1,
                 "month": 3,
                 "year": 2004
+              },
+              "grades": {
+                "length": 5,
+                "elements": [
+                  16,
+                  17,
+                  19,
+                  20,
+                  16
+                ]
               }
             }
         """.trimIndent()
 
         val person = JSONParser(json).load(Person1::class)
-        val expected = "Person1(name=Diogo, age=20, birthday=Date(year=2004, month=3, day=1))"
+        val expected = "Person1(name=Diogo, age=20, birthday=Date(year=2004, month=3, day=1), grades=[16, 17, 19, 20, 16])"
 
         assertEquals(expected, person.toString())
     }
